@@ -14,8 +14,32 @@ app.json.compact = False
 
 migrate = Migrate(app, db)
 db.init_app(app)
+ma= Marshmallow(app)
 
+class NewsletterSchema(ma.SQLAlchemySchema):
+
+    class Meta:
+        model = Newsletter
+        load_instance = True
+
+    title = ma.auto_field()
+    published_at = ma.auto_field()
+
+
+    url = ma.Hyperlinks(
+        {
+            "self": ma.URLFor(
+                "newsletterbyid",
+                values=dict(id="<id>")),
+            "collection": ma.URLFor("newsletters"),
+        }
+    )
+
+newsletter_schema = NewsletterSchema()
+newsletters_schema = NewsletterSchema(many=True)
 api = Api(app)
+
+
 
 class Index(Resource):
 
@@ -114,6 +138,7 @@ class NewsletterByID(Resource):
         )
 
         return response
+    
 
 api.add_resource(NewsletterByID, '/newsletters/<int:id>')
 
